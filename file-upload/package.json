@@ -1,0 +1,11 @@
+{
+  "name": "file-upload",
+  "version": "1.0.0",
+  "description": "Vanilla JS file upload",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./server/index.js"
+  },
+  "author": "Mike Mulligan",
+  "license": "MIT"
+}

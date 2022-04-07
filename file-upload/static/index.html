@@ -1,0 +1,74 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Uploader</title>
+  </head>
+  <body>
+    <h2>File Uploader</h2>
+    <input type="file" id="file" />
+    <button id="upload">Upload</button>
+    <small id="status"></small>
+    <script>
+      const file = document.getElementById("file");
+      const upload = document.getElementById("upload");
+      const uploadStatus = document.getElementById("status");
+
+      // Upload Event Listener
+      upload.addEventListener("click", () => {
+        uploadStatus.innerHTML = "Uploading...";
+
+        // Initialize a FileReader object
+        const fileReader = new FileReader();
+
+        // Use the file reader to read a file as an array buffer
+        fileReader.readAsArrayBuffer(file.files[0]);
+
+        // Successful File Read
+        fileReader.onload = async (e) => {
+          // File contents
+          const fileContents = e.target.result;
+
+          // Total chunk size in Bytes
+          const CHUNK_SIZE = 5000;
+
+          // Total chunks to send
+          const totalChunks = fileContents.byteLength / CHUNK_SIZE;
+
+          // Random file name
+          const splitFileName = file.value.split(".");
+          let fileExtension = "";
+
+          if (splitFileName.length > 1) {
+            fileExtension = splitFileName.pop();
+          }
+
+          const fileName = `${Math.random()
+            .toString(36)
+            .slice(-6)}.${fileExtension}`;
+
+          // Iterate over chunks
+          for (let chunk = 0; chunk < totalChunks + 1; chunk++) {
+            // Prepare the chunk to send to the backend
+            const preparedChunk = fileContents.slice(
+              chunk * CHUNK_SIZE,
+              (chunk + 1) * CHUNK_SIZE
+            );
+
+            // Send POST for each chunk
+            await fetch("/upload?fileName=" + fileName, {
+              method: "POST",
+              headers: {
+                "content-type": "application/octet-stream",
+                "content-length": preparedChunk.length,
+              },
+              body: preparedChunk,
+            });
+          }
+
+          uploadStatus.innerHTML = "File uploaded successfully.";
+        };
+      });
+    </script>
+  </body>
+</html>
